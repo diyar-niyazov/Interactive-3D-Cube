@@ -1,37 +1,35 @@
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Toolkit;
 import java.util.Arrays;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 public class Panel extends JPanel {
     private final double SIDE_LENGTH;
-    private final int WIDTH, HEIGHT, Z_NEAR;
+    private final int WIDTH, HEIGHT;
+    private int Z_NEAR;
+    private double angle = 0;
     private double[][] vertices;
     private double[][] projectedVertices;
     private int[][] translatedVertices;
 
-    public Panel() {
+    public Panel(int WIDTH, int HEIGHT) {
         setBackground(Color.BLACK);
 
-        SIDE_LENGTH = 2;
-
-        WIDTH = (int) Toolkit.getDefaultToolkit().getScreenSize().getWidth() / 2;
-        System.out.println("WIDTH: " + WIDTH);
-        HEIGHT = (int) Toolkit.getDefaultToolkit().getScreenSize().getHeight() / 2;
-        System.out.println("HEIGHT: " + HEIGHT);
-        System.out.println();
-        Z_NEAR = 2;
+        this.WIDTH = WIDTH;
+        this.HEIGHT = HEIGHT;
+        SIDE_LENGTH = 1;
+        Z_NEAR = 3;
 
         vertices = new double[][] {
                 // Front Bottom Left
-                { -SIDE_LENGTH, -SIDE_LENGTH, 0 },
+                { -SIDE_LENGTH, -SIDE_LENGTH, -SIDE_LENGTH },
                 // Front Bottom Right
-                { SIDE_LENGTH, -SIDE_LENGTH, 0 },
+                { SIDE_LENGTH, -SIDE_LENGTH, -SIDE_LENGTH },
                 // Front Top Right
-                { SIDE_LENGTH, SIDE_LENGTH, 0 },
+                { SIDE_LENGTH, SIDE_LENGTH, -SIDE_LENGTH },
                 // Front Top Left
-                { -SIDE_LENGTH, SIDE_LENGTH, 0 },
+                { -SIDE_LENGTH, SIDE_LENGTH, -SIDE_LENGTH },
                 // Back Bottom Left
                 { -SIDE_LENGTH, -SIDE_LENGTH, SIDE_LENGTH },
                 // Back Bottom Right
@@ -40,28 +38,30 @@ public class Panel extends JPanel {
                 { SIDE_LENGTH, SIDE_LENGTH, SIDE_LENGTH },
                 // Back Top Left
                 { -SIDE_LENGTH, SIDE_LENGTH, SIDE_LENGTH } };
-        System.out.println("VERTICES");
-        print(vertices);
-        projectedVertices = project(vertices);
-        System.out.println("\nPROJECTED VERTICES");
-        print(projectedVertices);
-        translatedVertices = translate(projectedVertices);
-        System.out.println("\nTRANSLATED VERTICES");
-        print(translatedVertices);
+
+        Timer timer = new Timer(16, e -> {
+            angle += 0.0001;
+            vertices = rotateY(vertices, angle);
+            projectedVertices = project(vertices);
+            translatedVertices = translate(projectedVertices);
+            repaint();
+        });
+        timer.start();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        g.setColor(Color.WHITE);
 
-        drawPoints(g, translatedVertices);
+        // g.setColor(Color.WHITE);
+        // drawPoints(g, translatedVertices);
+        g.setColor(Color.GREEN);
         drawLines(g, translatedVertices);
     }
 
     public void drawPoints(Graphics g, int[][] vertices) {
         for (int[] coordinate : vertices) {
-            int width = 10;
+            int width = 4;
             g.fillRect(
                     coordinate[0] - width / 2,
                     coordinate[1] - width / 2,
@@ -70,26 +70,39 @@ public class Panel extends JPanel {
         }
     }
 
-    public void drawLines(Graphics g, int[][] coordinates) {
-        for (int i = 0; i < 4; i++) {
-            g.drawLine(coordinates[i][0], coordinates[i][1],
-                    coordinates[(i + 1) % 4][0],
-                    coordinates[(i + 1) % 4][1]);
+    public void drawLines(Graphics g, int[][] c) {
+
+        int[][] edges = {
+                { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 },
+                { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 },
+                { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 }
+        };
+        for (int[] e : edges) {
+            g.drawLine(
+                    c[e[0]][0],
+                    c[e[0]][1],
+                    c[e[1]][0],
+                    c[e[1]][1]);
+
         }
-        for (int i = 0; i < 4; i++) {
-            g.drawLine(coordinates[i][0], coordinates[i][1],
-                    coordinates[(i + 1) % coordinates.length + 3][0],
-                    coordinates[(i + 1) % coordinates.length + 3][1]);
+    }
+
+    public double[][] rotateY(double[][] v, double angle) {
+        double cos = Math.cos(angle);
+        double sin = Math.sin(angle);
+
+        double[][] result = new double[v.length][3];
+
+        for (int i = 0; i < v.length; i++) {
+            double x = v[i][0];
+            double y = v[i][1];
+            double z = v[i][2];
+
+            result[i][0] = x * cos + z * sin;
+            result[i][1] = y;
+            result[i][2] = -x * sin + z * cos;
         }
-        for (int i = 0; i < 3; i++) {
-            g.drawLine(coordinates[i + 4][0], coordinates[i + 4][1],
-                    coordinates[(i + 5) % coordinates.length][0],
-                    coordinates[(i + 5) % coordinates.length][1]);
-        }
-        g.drawLine(coordinates[7][0],
-                coordinates[7][1],
-                coordinates[4][0],
-                coordinates[4][1]);
+        return result;
     }
 
     public double[][] project(double[][] vertices) {
@@ -107,17 +120,30 @@ public class Panel extends JPanel {
         for (int i = 0; i < coordinates.length; i++) {
             result[i][0] = (int) ((coordinates[i][0] + SIDE_LENGTH) * WIDTH / 2);
 
-            System.out.println("OLD X: " + coordinates[i][0]);
-            System.out.println("NEW X: " + (int) ((coordinates[i][0] + SIDE_LENGTH) * WIDTH / 2));
+            // System.out.println("OLD X: " + coordinates[i][0]);
+            // System.out.println("NEW X: " + (int) ((coordinates[i][0] + SIDE_LENGTH) *
+            // WIDTH / 2));
 
             result[i][1] = (int) ((-1 * coordinates[i][1] + SIDE_LENGTH) * HEIGHT / 2);
 
-            System.out.println("OLD Y: " + coordinates[i][1]);
-            System.out.println("NEW Y: " + (int) ((-1 * coordinates[i][1] + 1) * HEIGHT / 2));
+            // System.out.println("OLD Y: " + coordinates[i][1]);
+            // System.out.println("NEW Y: " + (int) ((-1 * coordinates[i][1] + 1) * HEIGHT /
+            // 2));
 
-            System.out.println();
+            // System.out.println();
         }
         return result;
+    }
+
+    public void printVertices() {
+        System.out.println("VERTICES");
+        print(vertices);
+        projectedVertices = project(vertices);
+        System.out.println("\nPROJECTED VERTICES");
+        print(projectedVertices);
+        translatedVertices = translate(projectedVertices);
+        System.out.println("\nTRANSLATED VERTICES");
+        print(translatedVertices);
     }
 
     public void print(int[][] array) {
