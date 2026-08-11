@@ -52,9 +52,7 @@ https://github.com/user-attachments/assets/0684d920-e3f0-4db1-9e80-3e6e825708c9
 
 Requires JDK 17+.
 
-​```bash
 git clone https://github.com/diyar-niyazov/Interactive-3D-Cube.git
 cd Interactive-3D-Cube
 javac -d bin src/*.java
 java -cp bin Main
-​```
