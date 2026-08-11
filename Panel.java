@@ -186,29 +186,6 @@ public class Panel extends JPanel implements KeyListener {
         return translatedVertices;
     }
 
-    public void printVertices() {
-        System.out.println("VERTICES");
-        print(rotatedVertices);
-        projectedVertices = project(rotatedVertices);
-        System.out.println("\nPROJECTED VERTICES");
-        print(projectedVertices);
-        translatedVertices = translate(projectedVertices);
-        System.out.println("\nTRANSLATED VERTICES");
-        print(translatedVertices);
-    }
-
-    public void print(int[][] array) {
-        for (int[] row : array) {
-            System.out.println(Arrays.toString(row));
-        }
-    }
-
-    public void print(double[][] array) {
-        for (double[] row : array) {
-            System.out.println(Arrays.toString(row));
-        }
-    }
-
     @Override
     public void keyTyped(KeyEvent ke) {
     }
@@ -263,14 +240,14 @@ public class Panel extends JPanel implements KeyListener {
             }
         }
 
-        double MAX_Z_NEAR = 2.5;
-        double MIN_Z_NEAR = 0.1;
+        double MIN_Z_NEAR = 2.5;
+        double MAX_Z_NEAR = 50;
         double Z_NEAR_INCREMENT = 0.1;
         if (keyCode == KeyEvent.VK_W) {
-            if (Z_NEAR > MAX_Z_NEAR)
+            if (Z_NEAR > MIN_Z_NEAR)
                 Z_NEAR -= Z_NEAR_INCREMENT;
         } else if (keyCode == KeyEvent.VK_S) {
-            if (Z_NEAR > MIN_Z_NEAR)
+            if (Z_NEAR < MAX_Z_NEAR)
                 Z_NEAR += Z_NEAR_INCREMENT;
         }
 
@@ -285,7 +262,7 @@ public class Panel extends JPanel implements KeyListener {
             case KeyEvent.VK_8 -> Color.DARK_GRAY;
             case KeyEvent.VK_9 -> Color.LIGHT_GRAY;
             case KeyEvent.VK_0 -> Color.WHITE;
-            default -> Color.GREEN;
+            default -> lineColor;
         };
 
         if (keyCode == KeyEvent.VK_EQUALS) {
@@ -298,4 +275,28 @@ public class Panel extends JPanel implements KeyListener {
     @Override
     public void keyReleased(KeyEvent ke) {
     }
+
+    public void printVertices() {
+        System.out.println("VERTICES");
+        print(rotatedVertices);
+        projectedVertices = project(rotatedVertices);
+        System.out.println("\nPROJECTED VERTICES");
+        print(projectedVertices);
+        translatedVertices = translate(projectedVertices);
+        System.out.println("\nTRANSLATED VERTICES");
+        print(translatedVertices);
+    }
+
+    public void print(int[][] array) {
+        for (int[] row : array) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
+    public void print(double[][] array) {
+        for (double[] row : array) {
+            System.out.println(Arrays.toString(row));
+        }
+    }
+
 }
