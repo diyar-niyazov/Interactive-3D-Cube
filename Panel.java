@@ -11,10 +11,10 @@ public class Panel extends JPanel implements KeyListener {
     // distance from the camera to the projection plane
     private static final int FPS = 60;
 
-    private boolean showPoints = true;
-
     private final int screenWidth, screenHeight;
     private double Z_NEAR = 3;
+    private boolean showPoints = false;
+    private Color lineColor = Color.GREEN;
 
     private boolean initialRotatingX = false;
     private boolean rotatingX = false;
@@ -84,7 +84,7 @@ public class Panel extends JPanel implements KeyListener {
             g.setColor(Color.WHITE);
             drawPoints(g, translatedVertices);
         }
-        g.setColor(Color.GREEN);
+        g.setColor(lineColor);
         drawLines(g, translatedVertices);
     }
 
@@ -214,7 +214,7 @@ public class Panel extends JPanel implements KeyListener {
     }
 
     @Override
-    public void keyPressed(KeyEvent ke) {        
+    public void keyPressed(KeyEvent ke) {
         int keyCode = ke.getKeyCode();
 
         if (keyCode == KeyEvent.VK_SPACE) {
@@ -272,6 +272,26 @@ public class Panel extends JPanel implements KeyListener {
         } else if (keyCode == KeyEvent.VK_S) {
             if (Z_NEAR > MIN_Z_NEAR)
                 Z_NEAR += Z_NEAR_INCREMENT;
+        }
+
+        lineColor = switch (keyCode) {
+            case KeyEvent.VK_1 -> Color.RED;
+            case KeyEvent.VK_2 -> Color.ORANGE;
+            case KeyEvent.VK_3 -> Color.YELLOW;
+            case KeyEvent.VK_4 -> Color.GREEN;
+            case KeyEvent.VK_5 -> Color.BLUE;
+            case KeyEvent.VK_6 -> Color.MAGENTA;
+            case KeyEvent.VK_7 -> Color.PINK;
+            case KeyEvent.VK_8 -> Color.DARK_GRAY;
+            case KeyEvent.VK_9 -> Color.LIGHT_GRAY;
+            case KeyEvent.VK_0 -> Color.WHITE;
+            default -> Color.GREEN;
+        };
+
+        if (keyCode == KeyEvent.VK_EQUALS) {
+            showPoints = true;
+        } else if (keyCode == KeyEvent.VK_MINUS) {
+            showPoints = false;
         }
     }
 
