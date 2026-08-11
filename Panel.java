@@ -1,10 +1,12 @@
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.Arrays;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class Panel extends JPanel {
+public class Panel extends JPanel implements KeyListener {
     private static final double CUBE_SIDE_LENGTH = 1;
     // distance from the camera to the projection plane
     private static final int Z_NEAR = 3;
@@ -21,6 +23,8 @@ public class Panel extends JPanel {
     private int[][] translatedVertices;
 
     public Panel(int frameWidth, int frameHeight) {
+        setFocusable(true);
+        addKeyListener(this);
         setBackground(Color.BLACK);
 
         this.screenWidth = frameWidth;
@@ -167,5 +171,27 @@ public class Panel extends JPanel {
         for (double[] row : array) {
             System.out.println(Arrays.toString(row));
         }
+    }
+
+    @Override
+    public void keyTyped(KeyEvent ke) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void keyPressed(KeyEvent ke) {
+        boolean spinningClockwise = angleIncrement > 0;
+        if (ke.getKeyCode() == KeyEvent.VK_RIGHT) {
+            if (spinningClockwise)
+                angleIncrement = -1 * angleIncrement;
+        } else if (ke.getKeyCode() == KeyEvent.VK_LEFT) {
+            if (!spinningClockwise)
+                angleIncrement = -1 * angleIncrement;
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent ke) {
+
     }
 }
