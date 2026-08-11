@@ -7,16 +7,16 @@ public class Frame extends JFrame {
     public Frame() {
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Dimension screensize = toolkit.getScreenSize();
-        int WIDTH = (int) (screensize.getWidth() / 2);
-        int HEIGHT = (int) (screensize.getHeight() / 2);
+        Dimension screenSize = toolkit.getScreenSize();
+        int frameWidth = (int) (screenSize.getWidth() / 2);
+        int frameHeight = (int) (screenSize.getHeight() / 2);
 
-        this.setSize(WIDTH, HEIGHT);
+        this.setSize(frameWidth, frameHeight);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setLocationRelativeTo(null);
 
-        this.add(new Panel(WIDTH, HEIGHT));
+        this.add(new Panel(frameWidth, frameHeight));
 
         setVisible(true);
     }

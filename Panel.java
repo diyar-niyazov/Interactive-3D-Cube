@@ -5,44 +5,51 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Panel extends JPanel {
-    private final double SIDE_LENGTH;
-    private final int WIDTH, HEIGHT;
-    private int Z_NEAR;
+    private static final double CUBE_SIDE_LENGTH = 1;
+    // distance from the camera to the projection plane
+    private static final int Z_NEAR = 3;
+    private static final int FPS = 60;
+
+    private final int screenWidth, screenHeight;
+
     private double angle = 0;
-    private double[][] vertices;
+    private double angleIncrement = Math.PI / FPS / 2;
+
+    private double[][] initialVertices;
+    private double[][] rotatedVertices;
     private double[][] projectedVertices;
     private int[][] translatedVertices;
 
-    public Panel(int WIDTH, int HEIGHT) {
+    public Panel(int frameWidth, int frameHeight) {
         setBackground(Color.BLACK);
 
-        this.WIDTH = WIDTH;
-        this.HEIGHT = HEIGHT;
-        SIDE_LENGTH = 1;
-        Z_NEAR = 3;
+        this.screenWidth = frameWidth;
+        this.screenHeight = frameHeight;
 
-        vertices = new double[][] {
+        initialVertices = new double[][] {
                 // Front Bottom Left
-                { -SIDE_LENGTH, -SIDE_LENGTH, -SIDE_LENGTH },
+                { -CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH },
                 // Front Bottom Right
-                { SIDE_LENGTH, -SIDE_LENGTH, -SIDE_LENGTH },
+                { CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH },
                 // Front Top Right
-                { SIDE_LENGTH, SIDE_LENGTH, -SIDE_LENGTH },
+                { CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH },
                 // Front Top Left
-                { -SIDE_LENGTH, SIDE_LENGTH, -SIDE_LENGTH },
+                { -CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH },
                 // Back Bottom Left
-                { -SIDE_LENGTH, -SIDE_LENGTH, SIDE_LENGTH },
+                { -CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH },
                 // Back Bottom Right
-                { SIDE_LENGTH, -SIDE_LENGTH, SIDE_LENGTH },
+                { CUBE_SIDE_LENGTH, -CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH },
                 // Back Top Right
-                { SIDE_LENGTH, SIDE_LENGTH, SIDE_LENGTH },
+                { CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH },
                 // Back Top Left
-                { -SIDE_LENGTH, SIDE_LENGTH, SIDE_LENGTH } };
+                { -CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH, CUBE_SIDE_LENGTH } };
+
+        rotatedVertices = initialVertices;
 
         Timer timer = new Timer(16, e -> {
-            angle += 0.0001;
-            vertices = rotateY(vertices, angle);
-            projectedVertices = project(vertices);
+            angle += angleIncrement;
+            rotatedVertices = rotateY(initialVertices, angle);
+            projectedVertices = project(rotatedVertices);
             translatedVertices = translate(projectedVertices);
             repaint();
         });
@@ -53,50 +60,62 @@ public class Panel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // g.setColor(Color.WHITE);
-        // drawPoints(g, translatedVertices);
+        g.setColor(Color.WHITE);
+        drawPoints(g, translatedVertices);
         g.setColor(Color.GREEN);
         drawLines(g, translatedVertices);
     }
 
     public void drawPoints(Graphics g, int[][] vertices) {
-        for (int[] coordinate : vertices) {
-            int width = 4;
+        for (int[] vertex : vertices) {
+            int pointSize = 4;
+            int xCoordinate = vertex[0];
+            int yCoordinate = vertex[1];
             g.fillRect(
-                    coordinate[0] - width / 2,
-                    coordinate[1] - width / 2,
-                    width,
-                    width);
+                    xCoordinate - pointSize / 2,
+                    yCoordinate - pointSize / 2,
+                    pointSize,
+                    pointSize);
         }
     }
 
-    public void drawLines(Graphics g, int[][] c) {
+    public void drawLines(Graphics g, int[][] vertices) {
 
         int[][] edges = {
+                // lines connecting cube's front vertices
+                // bottom line, right lines, top line, left line
                 { 0, 1 }, { 1, 2 }, { 2, 3 }, { 3, 0 },
+                // lines connecting cube's back vertices
+                // bottom line, right line, top line, left line
                 { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 },
+                // lines connecting cube's front vertices to back vertices
+                // bottom left, bottom right, top right, top left
                 { 0, 4 }, { 1, 5 }, { 2, 6 }, { 3, 7 }
         };
-        for (int[] e : edges) {
+        for (int[] edge : edges) {
             g.drawLine(
-                    c[e[0]][0],
-                    c[e[0]][1],
-                    c[e[1]][0],
-                    c[e[1]][1]);
+                    // first point's x coordinate
+                    vertices[edge[0]][0],
+                    // first point's y coordinate
+                    vertices[edge[0]][1],
+                    // second point's x coordinate
+                    vertices[edge[1]][0],
+                    // second point's y coordinate
+                    vertices[edge[1]][1]);
 
         }
     }
 
-    public double[][] rotateY(double[][] v, double angle) {
+    public double[][] rotateY(double[][] vertices, double angle) {
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
 
-        double[][] result = new double[v.length][3];
+        double[][] result = new double[vertices.length][3];
 
-        for (int i = 0; i < v.length; i++) {
-            double x = v[i][0];
-            double y = v[i][1];
-            double z = v[i][2];
+        for (int i = 0; i < vertices.length; i++) {
+            double x = vertices[i][0];
+            double y = vertices[i][1];
+            double z = vertices[i][2];
 
             result[i][0] = x * cos + z * sin;
             result[i][1] = y;
@@ -106,39 +125,31 @@ public class Panel extends JPanel {
     }
 
     public double[][] project(double[][] vertices) {
-        double[][] result = new double[vertices.length][2];
+        double[][] projectedVertices = new double[vertices.length][2];
         for (int i = 0; i < vertices.length; i++) {
-            result[i][0] = vertices[i][0] / (vertices[i][2] + Z_NEAR);
-            result[i][1] = vertices[i][1] / (vertices[i][2] + Z_NEAR);
+            // x' = x / (z + Z_NEAR)
+            projectedVertices[i][0] = vertices[i][0] / (vertices[i][2] + Z_NEAR);
+            // y' = y / (z + Z_NEAR)
+            projectedVertices[i][1] = vertices[i][1] / (vertices[i][2] + Z_NEAR);
         }
-        return result;
+        return projectedVertices;
     }
 
     public int[][] translate(double[][] coordinates) {
+        // translates cartesian coordinates (-1,1) to graphics coordinates (0, width)
         // -1..1 => 0..2 => 0..2w => 0..w
-        int[][] result = new int[vertices.length][2];
+        int[][] translatedVertices = new int[rotatedVertices.length][2];
         for (int i = 0; i < coordinates.length; i++) {
-            result[i][0] = (int) ((coordinates[i][0] + SIDE_LENGTH) * WIDTH / 2);
-
-            // System.out.println("OLD X: " + coordinates[i][0]);
-            // System.out.println("NEW X: " + (int) ((coordinates[i][0] + SIDE_LENGTH) *
-            // WIDTH / 2));
-
-            result[i][1] = (int) ((-1 * coordinates[i][1] + SIDE_LENGTH) * HEIGHT / 2);
-
-            // System.out.println("OLD Y: " + coordinates[i][1]);
-            // System.out.println("NEW Y: " + (int) ((-1 * coordinates[i][1] + 1) * HEIGHT /
-            // 2));
-
-            // System.out.println();
+            translatedVertices[i][0] = (int) ((coordinates[i][0] + CUBE_SIDE_LENGTH) * screenWidth / 2);
+            translatedVertices[i][1] = (int) ((-1 * coordinates[i][1] + CUBE_SIDE_LENGTH) * screenHeight / 2);
         }
-        return result;
+        return translatedVertices;
     }
 
     public void printVertices() {
         System.out.println("VERTICES");
-        print(vertices);
-        projectedVertices = project(vertices);
+        print(rotatedVertices);
+        projectedVertices = project(rotatedVertices);
         System.out.println("\nPROJECTED VERTICES");
         print(projectedVertices);
         translatedVertices = translate(projectedVertices);
