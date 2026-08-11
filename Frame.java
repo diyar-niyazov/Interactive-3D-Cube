@@ -8,8 +8,8 @@ public class Frame extends JFrame {
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
-        int frameWidth = (int) (screenSize.getWidth() / 2);
-        int frameHeight = (int) (screenSize.getHeight() / 2);
+        int frameWidth = (int) (screenSize.getWidth() * 0.75);
+        int frameHeight = (int) (screenSize.getHeight() * 0.75);
 
         this.setSize(frameWidth, frameHeight);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
