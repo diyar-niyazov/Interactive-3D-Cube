@@ -251,6 +251,14 @@ public class Panel extends JPanel implements KeyListener {
                 Z_NEAR += Z_NEAR_INCREMENT;
         }
 
+	if (keyCode == KeyEvent.VK_PERIOD) {
+		xAngleIncrement *= 1.25;
+		yAngleIncrement *= 1.25;
+	} else if (keyCode == KeyEvent.VK_COMMA) {
+		xAngleIncrement *= 0.75;
+		yAngleIncrement *= 0.75;
+	}
+
         lineColor = switch (keyCode) {
             case KeyEvent.VK_1 -> Color.RED;
             case KeyEvent.VK_2 -> Color.ORANGE;

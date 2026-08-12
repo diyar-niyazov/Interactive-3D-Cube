@@ -57,3 +57,19 @@ java -cp bin Main
 | --- | ------------- |
 | `=` | Show vertices |
 | `-` | Hide vertices |
+
+### Speed
+
+| Key | Action       |
+| --- | ------------ |
+| ',' | -0.25x speed |
+| '.' | +0.25x speed |
+
+## Build & Run
+
+Requires JDK 17+.
+
+git clone https://github.com/diyar-niyazov/Interactive-3D-Cube.git
+cd Interactive-3D-Cube
+javac -d bin src/*.java
+java -cp bin Main
