@@ -64,12 +64,3 @@ java -cp bin Main
 | --- | ------------ |
 | ',' | -0.25x speed |
 | '.' | +0.25x speed |
-
-## Build & Run
-
-Requires JDK 17+.
-
-git clone https://github.com/diyar-niyazov/Interactive-3D-Cube.git
-cd Interactive-3D-Cube
-javac -d bin src/*.java
-java -cp bin Main
