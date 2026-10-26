@@ -2,3 +2,5 @@ src/Parser.java
 bin/
 assets/
 *.class
+__pycache__/
+*.py[cod]
